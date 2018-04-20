@@ -1,0 +1,3 @@
+[submodule "github.com/mbrochh/react-apollo-graphql-demo"]
+	path = github.com/mbrochh/react-apollo-graphql-demo
+	url = https://github.com/mbrochh/react-apollo-graphql-demo

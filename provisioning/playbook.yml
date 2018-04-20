@@ -21,13 +21,16 @@
     - geerlingguy.ntp
     - geerlingguy.git
     - geerlingguy.pip
+    - geerlingguy.nodejs
 
   tasks:
     # Example read-write git checkout from github
     - git:
         repo: https://github.com/mbrochh/react-apollo-graphql-demo
         dest: /home/{{ user_name }}/github.com/mbrochh/react-apollo-graphql-demo
-
+      become: yes
+      become_user: "{{ user_name }}"
+      
     - name: check default python version
       shell: "python --version 2>&1 | awk '{print $2}'"
       register: python_installed_version
@@ -45,8 +48,26 @@
 
     - name: Creates directory
       file: path=/home/{{ user_name }}/Envs state=directory
+      become_user: "{{ user_name }}"
 
     - name: ensure home files are created
       copy: src=files/{{ item }} dest=/home/{{ user_name }}/{{ item }}
       with_items:
         - .bashrc
+      become: yes
+      become_user: "{{ user_name }}"
+
+    - name: Install packages based on package.json.
+      npm:
+        path: "/home/{{ user_name }}/github.com/mbrochh/react-apollo-graphql-demo/frontend"
+      become: yes
+      become_user: "{{ user_name }}"   
+
+    - name: Make a virtualenv
+      shell: . /usr/local/bin/virtualenvwrapper.sh && cd ~/github.com/mbrochh/react-apollo-graphql-demo/backend && mkvirtualenv react-apollo-graphql-demo &&  pip install -r requiremets.txt
+      args:
+        executable: /bin/bash
+        creates: "react-apollo-graphql-demo"
+      become: yes
+      become_user: "{{ user_name }}"   
+

@@ -1,0 +1,16 @@
+---
+ntp_timezone: America/Chicago
+
+firewall_allowed_tcp_ports:
+  - "22"
+  - "3000"
+  - "8000"
+
+git_install_from_source: false
+
+pip_install_packages:
+  # Specify names and versions.
+  - name: virtualenvwrapper
+    state: latest
+
+user_name: vagrant

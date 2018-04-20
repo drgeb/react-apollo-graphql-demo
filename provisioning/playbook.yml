@@ -1,0 +1,52 @@
+---
+# Copied from Geerling and modified for
+# the react-apollo-graphql-demo
+# Ansible playbook for a Ragd server.
+#
+# @author Gerald Bennett (2018).
+
+- hosts: ragd
+  gather_facts: yes
+
+  vars_files:
+    - vars/main.yml
+
+  pre_tasks:
+    - name: Update apt cache if needed.
+      apt: update_cache=yes cache_valid_time=3600
+      become: yes
+
+  roles:
+    - geerlingguy.firewall
+    - geerlingguy.ntp
+    - geerlingguy.git
+    - geerlingguy.pip
+
+  tasks:
+    # Example read-write git checkout from github
+    - git:
+        repo: https://github.com/mbrochh/react-apollo-graphql-demo
+        dest: /home/{{ user_name }}/github.com/mbrochh/react-apollo-graphql-demo
+
+    - name: check default python version
+      shell: "python --version 2>&1 | awk '{print $2}'"
+      register: python_installed_version
+      changed_when: false
+
+    - name: install python-dev
+      apt: name={{ item }}  update_cache=yes  state=present force=yes
+      with_items: [ "python-dev" ]
+      when: python_installed_version.stdout | version_compare('3.0', '<')
+
+    - name: install python3-dev
+      apt: name={{ item }}  update_cache=yes  state=present force=yes
+      with_items: [ "python3-dev" ]
+      when: python_installed_version.stdout | version_compare('3.0', '>=') 
+
+    - name: Creates directory
+      file: path=/home/{{ user_name }}/Envs state=directory
+
+    - name: ensure home files are created
+      copy: src=files/{{ item }} dest=/home/{{ user_name }}/{{ item }}
+      with_items:
+        - .bashrc
